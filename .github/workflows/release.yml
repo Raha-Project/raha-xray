@@ -1,0 +1,59 @@
+name: Release raha-xray
+on:
+  push:
+    tags:
+      - "*"
+  workflow_dispatch:
+
+jobs:
+  linuxamd64build:
+    name: build raha-xray amd64 version
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      - name: build linux amd64 version
+        run: |
+          CGO_ENABLED=1 GOOS=linux GOARCH=amd64 go build -o raha-xray-release -v main.go
+          mkdir raha-xray
+          cp raha-xray-release raha-xray/rahaXray
+      - name: package
+        run: tar -zcvf raha-xray-linux-amd64.tar.gz raha-xray
+      - name: upload
+        uses: svenstaro/upload-release-action@2.7.0
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          file: raha-xray-linux-amd64.tar.gz
+          asset_name: raha-xray-linux-amd64.tar.gz
+          prerelease: true
+  linuxarm64build:
+    name: build raha-xray arm64 version
+    runs-on: ubuntu-20.04
+    steps:
+      - uses: actions/checkout@v4
+      - name: Set up Go
+        uses: actions/setup-go@v4
+        with:
+          go-version: '1.21'
+      - name: build linux arm64 version
+        run: |
+          sudo apt-get update
+          sudo apt install gcc-aarch64-linux-gnu
+          CGO_ENABLED=1 GOOS=linux GOARCH=arm64 CC=aarch64-linux-gnu-gcc go build -o raha-xray-release -v main.go
+          mkdir raha-xray
+          cp raha-xray-release raha-xray/rahaXray
+      - name: package
+        run: tar -zcvf raha-xray-linux-arm64.tar.gz raha-xray
+      - name: upload
+        uses: svenstaro/upload-release-action@2.7.0
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          tag: ${{ github.ref }}
+          file: raha-xray-linux-arm64.tar.gz
+          asset_name: raha-xray-linux-arm64.tar.gz
+          prerelease: true
+          

@@ -1,0 +1,12 @@
+.git
+.dockerignore
+.idea
+.vscode
+.cache
+.sync*
+run.sh
+*.tar.gz
+/*.json
+/dist/
+/db/
+/xray-core/
