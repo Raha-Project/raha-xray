@@ -75,14 +75,14 @@ func (a *ClientHandler) add(c *gin.Context) {
 }
 
 func (a *ClientHandler) update(c *gin.Context) {
-	var client *model.Client
-	err := c.ShouldBind(&client)
+	var data map[string]interface{}
+	err := c.ShouldBind(&data)
 	if err != nil {
 		jsonMsg(c, "Error in fetch client data:", err)
 		return
 	}
 
-	err, needRestart := a.ClientService.Update(client)
+	err, needRestart := a.ClientService.Update(data)
 	if err != nil {
 		jsonMsg(c, "Error in updating client:", err)
 		return

@@ -95,7 +95,7 @@ func (s *ClientService) Add(clients []*model.Client) (error, bool) {
 	return nil, needRestart
 }
 
-func (s *ClientService) Update(client *model.Client) (error, bool) {
+func (s *ClientService) Update(data map[string]interface{}) (error, bool) {
 	var err, err1 error
 	db := database.GetDB()
 	tx := db.Begin()
@@ -114,64 +114,69 @@ func (s *ClientService) Update(client *model.Client) (error, bool) {
 		needRestart = true
 	}
 
+	// Find old configuration of client by id
 	var oldClient model.Client
-	err = tx.Model(model.Client{}).Where("id = ?", client.Id).Preload("ClientInbounds").Find(&oldClient).Error
+	err = tx.Model(model.Client{}).Where("id = ?", data["id"]).Preload("ClientInbounds").Find(&oldClient).Error
 	if err != nil {
 		return err, false
 	}
 
-	// Remove all clients from xray
-	if !needRestart && oldClient.Enable {
-		needRestart = s.apiRemoveClients(tx, client.Id)
+	// Update the newClient with data inside the map
+	newClient := oldClient
+	dataBytes, err := json.Marshal(data)
+	if err != nil {
+		return err, false
+	}
+	err = json.Unmarshal(dataBytes, &newClient)
+	if err != nil {
+		return err, false
 	}
 
-	for index, clientInbound := range oldClient.ClientInbounds {
-		var inbound model.Inbound
-		err1 = tx.Model(model.Inbound{}).Preload("Config").Where("id = ?", clientInbound.InboundId).Find(&inbound).Error
-		if err1 != nil {
-			logger.Debug("Failed to find inbound data for add client by API:", err1)
-			needRestart = true
-		} else {
-			// Add client ID
-			clientInbound.ClientId = client.Id
+	// Check for critical changes
+	if newClient.Name != oldClient.Name || newClient.Enable != oldClient.Enable {
+		// Remove all clients from xray
+		if !needRestart && oldClient.Enable {
+			needRestart = s.apiRemoveClients(tx, oldClient.Id)
+		}
 
-			// Push email to config
-			var clientConfig map[string]interface{}
-			json.Unmarshal([]byte(clientInbound.Config), &clientConfig)
-			clientConfig["email"] = client.Name
-			newClientConfig, _ := json.MarshalIndent(clientConfig, "", "  ")
-			oldClient.ClientInbounds[index].Config = string(newClientConfig)
+		for index, clientInbound := range oldClient.ClientInbounds {
+			var inbound model.Inbound
+			err1 = tx.Model(model.Inbound{}).Preload("Config").Where("id = ?", clientInbound.InboundId).Find(&inbound).Error
+			if err1 != nil {
+				logger.Debug("Failed to find inbound data for add client by API:", err1)
+				needRestart = true
+			} else {
+				// Add client ID
+				clientInbound.ClientId = newClient.Id
 
-			if !needRestart && client.Enable {
-				// Call API
-				err1 = s.XrayAPI.AddUser(string(inbound.Config.Protocol), inbound.Tag, clientConfig)
-				if err1 == nil {
-					logger.Debug("Client added by api:", client.Name)
-				} else {
-					logger.Debug("Failed to adding client by api:", err1)
-					needRestart = true
+				// Push email to config
+				var clientConfig map[string]interface{}
+				json.Unmarshal([]byte(clientInbound.Config), &clientConfig)
+				clientConfig["email"] = newClient.Name
+				newClientConfig, _ := json.MarshalIndent(clientConfig, "", "  ")
+				oldClient.ClientInbounds[index].Config = string(newClientConfig)
+
+				if !needRestart && newClient.Enable {
+					// Call API
+					err1 = s.XrayAPI.AddUser(string(inbound.Config.Protocol), inbound.Tag, clientConfig)
+					if err1 == nil {
+						logger.Debug("Client added by api:", newClient.Name)
+					} else {
+						logger.Debug("Failed to adding client by api:", err1)
+						needRestart = true
+					}
 				}
 			}
 		}
-	}
-	// Update ClientInbounds due to changes client
-	err = tx.Save(oldClient.ClientInbounds).Error
-	if err != nil {
-		return err, true // Restart on unsuccessfull update
+		// Update ClientInbounds due to changes client
+		err = tx.Save(oldClient.ClientInbounds).Error
+		if err != nil {
+			return err, true // Restart on unsuccessfull update
+		}
 	}
 
-	newClient := model.Client{
-		Id:     client.Id,
-		Name:   client.Name,
-		Enable: client.Enable,
-		Quota:  client.Quota,
-		Expiry: client.Expiry,
-		Reset:  client.Reset,
-		Once:   client.Once,
-		Up:     client.Up,
-		Down:   client.Down,
-		Remark: client.Remark,
-	}
+	// Avoid changing ClientInbounds
+	newClient.ClientInbounds = nil
 
 	// Update client
 	err = tx.Save(newClient).Error
