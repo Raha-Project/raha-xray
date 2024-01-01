@@ -9,7 +9,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/shirou/gopsutil/v3 v3.23.12
 	github.com/xtls/xray-core v1.8.6
-	google.golang.org/grpc v1.60.0
+	google.golang.org/grpc v1.60.1
 	gorm.io/driver/mysql v1.5.2
 	gorm.io/driver/sqlite v1.5.4
 	gorm.io/gorm v1.25.5
