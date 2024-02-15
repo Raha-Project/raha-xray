@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/signal"
 	"raha-xray/api"
-	"raha-xray/api/global"
 	"raha-xray/config"
 	"raha-xray/database"
 	"raha-xray/database/model"
@@ -46,7 +45,6 @@ func runServer() {
 	}
 
 	server := api.NewServer()
-	global.SetWebServer(server)
 	err = server.Start()
 	if err != nil {
 		log.Println(err)
@@ -66,7 +64,6 @@ func runServer() {
 				logger.Warning("stop server err:", err)
 			}
 			server = api.NewServer()
-			global.SetWebServer(server)
 			err = server.Start()
 			if err != nil {
 				log.Println(err)
