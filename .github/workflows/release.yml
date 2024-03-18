@@ -23,7 +23,7 @@ jobs:
       - name: package
         run: tar -zcvf raha-xray-linux-amd64.tar.gz raha-xray
       - name: upload
-        uses: svenstaro/upload-release-action@2.7.0
+        uses: svenstaro/upload-release-action@2.9.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
@@ -49,7 +49,7 @@ jobs:
       - name: package
         run: tar -zcvf raha-xray-linux-arm64.tar.gz raha-xray
       - name: upload
-        uses: svenstaro/upload-release-action@2.7.0
+        uses: svenstaro/upload-release-action@2.9.0
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
           tag: ${{ github.ref }}
