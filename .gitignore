@@ -10,3 +10,4 @@ run.sh
 /dist/
 /db/
 /xray-core/
+.DS_Store
