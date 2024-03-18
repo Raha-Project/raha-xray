@@ -1,7 +1,7 @@
 module raha-xray
 
 go 1.21
-toolchain go1.21.6
+toolchain go1.22.1
 
 require (
 	github.com/gin-gonic/gin v1.9.1
@@ -10,9 +10,9 @@ require (
 	github.com/shirou/gopsutil/v3 v3.24.1
 	github.com/xtls/xray-core v1.8.7
 	google.golang.org/grpc v1.61.0
-	gorm.io/driver/mysql v1.5.2
+	gorm.io/driver/mysql v1.5.5
 	gorm.io/driver/sqlite v1.5.4
-	gorm.io/gorm v1.25.6
+	gorm.io/gorm v1.25.7
 )
 
 require (
