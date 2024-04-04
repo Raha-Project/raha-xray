@@ -9,7 +9,7 @@ require (
 	github.com/robfig/cron/v3 v3.0.1
 	github.com/shirou/gopsutil/v3 v3.24.2
 	github.com/xtls/xray-core v1.8.9
-	google.golang.org/grpc v1.62.1
+	google.golang.org/grpc v1.63.0
 	gorm.io/driver/mysql v1.5.6
 	gorm.io/driver/sqlite v1.5.5
 	gorm.io/gorm v1.25.8
@@ -32,7 +32,6 @@ require (
 	github.com/go-sql-driver/mysql v1.7.1 // indirect
 	github.com/go-task/slim-sprig v0.0.0-20230315185526-52ccab3ef572 // indirect
 	github.com/goccy/go-json v0.10.2 // indirect
-	github.com/golang/protobuf v1.5.4 // indirect
 	github.com/google/btree v1.1.2 // indirect
 	github.com/google/pprof v0.0.0-20240227163752-401108e1b7e7 // indirect
 	github.com/gorilla/websocket v1.5.1 // indirect
