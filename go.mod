@@ -11,7 +11,7 @@ require (
 	github.com/xtls/xray-core v1.8.24
 	google.golang.org/grpc v1.70.0
 	gorm.io/driver/mysql v1.5.7
-	gorm.io/driver/sqlite v1.5.6
+	gorm.io/driver/sqlite v1.5.7
 	gorm.io/gorm v1.25.12
 )
 
